@@ -5,7 +5,7 @@ This is an attempt to clarify how transactions work with Activiti, with Squeryl 
 
 They go together with the tests in this repository. Please read this document, and then read and execute the tests in this project. To execute the tests, run
 
-    sbt test
+    ./sbt test
 
 Activiti Transactions
 ---------------------
@@ -243,3 +243,8 @@ Random other notes
 Currently when an Activiti process is started inside an `inTransaction` block, the process and its delegates will join the existing transaction. However, if something is started outside an `inTransaction` block (and this would notably be when Activit's Job Executor runs something, so this includes all activities following one marked as `async`), the Activiti transaction and each delegate runs in its own transaction.
 
 For correctness, we should probably join the Activiti and delegate transactions as well. We should be able to do this in the `SquerylJoinedTransactionFactory`.
+
+The Bottom of The Document
+--------------------------
+
+Wow, you've read it all. Don't forget to go read and execute the tests now!
