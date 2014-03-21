@@ -68,6 +68,11 @@ One thing to keep in mind is the size (duration and data touched) of transaction
 
 To be more specific: If the transaction of `Service Task #1` touches a lot of data, but finishes quickly, and the transaction of `Service Task #2` touches almost nothing, but takes a very long time, no problems are to be expected if they are executed in separate transactions. If they are joined in the same transaction however, there is an increased chance of deadlocks.
 
+##### Transactions in asynchronous Activiti executions
+
+When an Activiti process is started inside an `inTransaction` block, the process and its delegates will join the existing transaction. However, if something is started outside an `inTransaction` block (and this would notably be when Activit's Job Executor runs something, so this includes all activities following one marked as `async`), there is no Squeryl transaction yet. In those cases, `SquerylJoinedTransactionFactory` will start a new Squeryl transaction, for which the commit and rollback is handled by Activiti invoking the proper methods on the `Transaction` that the factory provided to Activiti. 
+
+
 ###### Pros
  * Automatic transaction rollback of *everything* on exceptions
  * No need to have compensating delegates
@@ -234,15 +239,6 @@ Determine where long transactions happen, and work towards reducing their durati
 A quick utility to help with finding long transactions is here: [transaction-timer branch of Core WS](https://github.com/elogistics/vcsplus-core-ws/tree/transaction-timer).
 
 Any long transactions that remain and that can't be avoided can be serialized, like we do now with the hanmov and hansta business process dispatchers. If they take a *really* long time and it gets more towards queueing tasks than merely serializing them, we should pick a proper queue system instead of abusing an Akka mailbox as one.
-
-Random other notes
-------------------
-
-#### Transactions in asynchronous Activiti executions
-
-Currently when an Activiti process is started inside an `inTransaction` block, the process and its delegates will join the existing transaction. However, if something is started outside an `inTransaction` block (and this would notably be when Activit's Job Executor runs something, so this includes all activities following one marked as `async`), the Activiti transaction and each delegate runs in its own transaction.
-
-For correctness, we should probably join the Activiti and delegate transactions as well. We should be able to do this in the `SquerylJoinedTransactionFactory`.
 
 The Bottom of The Document
 --------------------------

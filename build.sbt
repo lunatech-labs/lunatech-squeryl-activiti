@@ -10,3 +10,7 @@ libraryDependencies ++= Seq(
 
 resolvers ++= Seq(
   "Alfresco Maven" at "https://maven.alfresco.com/nexus/content/groups/public/")
+
+parallelExecution in Test := false
+
+fork in Test := false
